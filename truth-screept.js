@@ -77,8 +77,7 @@ function sortaGovna(el) {
 	}
 }
 
-function updateThreads() {	
-	alert('asd');
+function updateThreads() {
 	sortaGovna(document.body);
 	if(observer) {
 		observer.disconnect();
