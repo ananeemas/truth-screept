@@ -9,7 +9,10 @@
 // @grant       none
 // ==/UserScript==
 
-var WHO_ARE_PETOOKHEE = ["Коммунизм", "Социализм"];
+(function() {
+"use strict";
+
+var WHO_ARE_PETOOKHEE = ["Коммунизм", "Социализм", "Сионизм"];
 var WHO_ARE_KAKAHI = ["Власть", "Патриот", "ЛГБТ"];
 var WHO_IS_CHERV_PEEDOR = ["Христианство"];
 var WHO_ARE_SVINEE = ["Украина"];
@@ -52,7 +55,7 @@ var getHash = function(name) {
 		return this[name];
 	}
 	var hash = 0;
-	for(var i = 0, len = name.length; i < len; ++i) {
+	for(var i = 0; i < name.length; ++i) {
 		hash = (((hash << 5) - hash) + name.charCodeAt(i)) | 0;
 	}
 	return this[name] = Math.abs(hash);
@@ -69,9 +72,9 @@ function sortaGovna(el) {
 		var title = img.getAttribute('title');
 		var info = TitleMap[title];
 		if(info) {
-			var id = (icon.parentNode.getElementsByClassName('ananimas') || {}).textContent;
+			var id = (icon.parentNode.querySelector('.ananimas') || {}).textContent;
 			var images = info[0];
-			img.src = images[getHash(name || '') % images.length];
+			img.src = images[getHash(id || '') % images.length];
 			img.title = info[1];
 		}
 	}
@@ -115,3 +118,4 @@ if(document.readyState === 'interactive' || document.readyState === 'complete') 
 } else {
 	document.addEventListener('DOMContentLoaded', init, false);
 }
+})();
