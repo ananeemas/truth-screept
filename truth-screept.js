@@ -45,16 +45,21 @@ var SVINEE = [
 
 var TitleMap = Object.create(null);
 
+var observer;
+
+var getHash = function() {
+	if(name in this) {
+		return this[name];
+	}
+	var hash = 0;
+	for(var i = 0, len = name.length; i < len; ++i) {
+		hash = (((hash << 5) - hash) + name.charCodeAt(i)) | 0;
+	}
+	return this[name] = Math.abs(hash);
+}.bind(Object.create(null));
+
 function sortaGovna(el) {
-	var icons;
-	if(el.nodeType !== 1) {
-		return;
-	}
-	if(el.className === 'post-icon') {
-		icons = [el];
-	} else {
-		icons = el.getElementsByClassName('post-icon');
-	}
+	var icons = el.getElementsByClassName('post-icon');
 	for(var i = 0; i < icons.length; ++i) {
 		var icon = icons[i];
 		if(icon.childElementCount !== 2) {
@@ -64,11 +69,32 @@ function sortaGovna(el) {
 		var title = img.getAttribute('title');
 		var info = TitleMap[title];
 		if(info) {
-			var id = +icon.parentNode.parentNode.dataset.num;
+			var id = (icon.parentNode.getElementsByClassName('ananimas') || {}).textContent;
 			var images = info[0];
-			img.src = images[id % images.length];
+			img.src = images[getHash(name || '') % images.length];
 			img.title = info[1];
 		}
+	}
+}
+
+function updateThreads() {	
+	alert('asd');
+	sortaGovna(document.body);
+	if(observer) {
+		observer.disconnect();
+	} else {
+		observer = new MutationObserver(function(mutations) {
+			for(var i = 0; i < mutations.length; ++i) {
+				var newNodes = mutations[i].addedNodes;
+				for(var j = 0; j < newNodes.length; ++j) {
+					sortaGovna(newNodes[i]);
+				}
+			}
+		});
+	}	
+	var threads = document.body.getElementsByClassName('thread');
+	for(var i = 0; i < threads.length; ++i) {
+		observer.observe(threads[i], {childList: true});
 	}
 }
 
@@ -81,15 +107,8 @@ function init() {
 	WHO_ARE_PETOOKHEE.forEach(addMapItem, [PEETOHS, 'Петух']);
 	WHO_ARE_SVINEE.forEach(addMapItem, [SVINEE, 'Хохлуту']);
 	
-	sortaGovna(document.body);
-	new MutationObserver(function(mutations) {
-		for(var i = 0; i < mutations.length; ++i) {
-			var newNodes = mutations[i].addedNodes;
-			for(var j = 0; j < newNodes.length; ++j) {
-				sortaGovna(newNodes[i]);
-			}
-		}
-	}).observe(document, {childList: true, subtree: true});
+	updateThreads();
+	new MutationObserver(updateThreads).observe(document.querySelector('.posts > form'), {childList: true});
 }
 
 if(document.readyState === 'interactive' || document.readyState === 'complete') {
