@@ -10,7 +10,7 @@
 // ==/UserScript==
 
 var WHO_ARE_PETOOKHEE = ["Коммунизм", "Социализм"];
-var WHO_ARE_KAKAHI = ["Власть", "Патриот"];
+var WHO_ARE_KAKAHI = ["Власть", "Патриот", "ЛГБТ"];
 var WHO_IS_CHERV_PEEDOR = ["Христианство"];
 var WHO_ARE_SVINEE = ["Украина"];
 
@@ -43,43 +43,52 @@ var SVINEE = [
 	"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAKCAIAAAAy3EnLAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAYdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuNWWFMmUAAAEuSURBVChTlZHLT4NAEMb51715UNMYoybFpjyqtWALVlsM9EVZkJYujwJdlqDeTTTpwahcXKxJ28RLJ5PJl5nvl53MUtmOsQbM0VBpikBqPKlyIF/12LLC0a7WTcAge9QdVZmYJsaYStOUuElVb65b5bM3CPLE/TctSfQhpOIosof9Z0N7dcak+7mY5YmXY3/TuspBrWJbFuV7LhjrPfoICtUczT4ipxhvAO/QKASCuljvK51ipcD3nYkNum2zVg5b/BeCy9j9RnAFvPTaRC89S+AYsvzWlRZxPO3cwuYlv79nNxh8LwD2XD45jB/kzsWpCQDxbANBMNcUiWO7svTX+g17NDTqTBSGRK8BcrI7np0Ao1I6mE2nGCdxGCYIJWjRqtKV4xJ5n9h2/Lgs+wEa/YaIKdqSPQAAAABJRU5ErkJggg=="
 ];
 
-var getHash = function() {
-	if(name in this) {
-		return this[name];
-	}
-	var hash = 0;
-	for(var i = 0, len = name.length; i < len; ++i) {
-		hash = (((hash << 5) - hash) + name.charCodeAt(i)) | 0;
-	}
-	return this[name] = Math.abs(hash);
-}.bind(Object.create(null));
+var TitleMap = Object.create(null);
 
-function makeKakaha(imgEl, images, desc) {
-	var id = (imgEl.parentNode.parentNode.getElementsByClassName("ananimas")[0] || {}).textContent;
-	var kakahaNum = getHash(id || "") % images.length;
-	imgEl.src = images[kakahaNum];
-	imgEl.title = desc;
-}
-
-function sortaGovna(titles, images, desc) {
-	for(var i = 0; i < titles.length; ++i) {
-		var imgEls = document.querySelectorAll('img[title="' + titles[i] + '"]');
-		for(var j = 0; j < imgEls.length; ++j) {
-			makeKakaha(imgEls[j], images, desc);
+function sortaGovna(el) {
+	var icons;
+	if(el.className === 'post-icon') {
+		icons = [el];
+	} else if(el.nodeType === 1) {
+		icons = el.getElementsByClassName('post-icon');
+	} else {
+		return;
+	}
+	for(var i = 0; i < icons.length; ++i) {
+		var icon = icons[i];
+		if(icon.childElementCount !== 2) {
+			continue;
+		}
+		var img = icon.firstElementChild;
+		var title = img.getAttribute('title');
+		var info = TitleMap[title];
+		if(info) {
+			var id = +icon.parentNode.parentNode.dataset.num;
+			var images = info[0];
+			img.src = images[id % images.length];
+			img.title = info[1];
 		}
 	}
 }
 
-function doIT() {
-	sortaGovna(WHO_IS_CHERV_PEEDOR, CHERV_PEEDOR, 'Червь-пидор');
-	sortaGovna(WHO_ARE_KAKAHI, KAKAHI, 'Говно какое-то');
-	sortaGovna(WHO_ARE_PETOOKHEE, PEETOHS, 'Петух');
-	sortaGovna(WHO_ARE_SVINEE, SVINEE, 'Хохлуту');
-}
-
 function init() {
-	doIT();
-	new MutationObserver(doIT).observe(document, {childList: true, subtree: true});
+	function addMapItem(title) {
+		TitleMap[title] = this;
+	}
+	WHO_IS_CHERV_PEEDOR.forEach(addMapItem, [CHERV_PEEDOR, 'Червь-пидор']);
+	WHO_ARE_KAKAHI.forEach(addMapItem, [KAKAHI, 'Говно какое-то']);
+	WHO_ARE_PETOOKHEE.forEach(addMapItem, [PEETOHS, 'Петух']);
+	WHO_ARE_SVINEE.forEach(addMapItem, [SVINEE, 'Хохлуту']);
+	
+	sortaGovna(document.body);
+	new MutationObserver(function(mutations) {
+		for(var i = 0; i < mutations.length; ++i) {
+			var newNodes = mutations[i].addedNodes;
+			for(var j = 0; j < newNodes.length; ++j) {
+				sortaGovna(newNodes[i]);
+			}
+		}
+	}).observe(document, {childList: true, subtree: true});
 }
 
 if(document.readyState === 'interactive' || document.readyState === 'complete') {
