@@ -47,12 +47,13 @@ var TitleMap = Object.create(null);
 
 function sortaGovna(el) {
 	var icons;
+	if(el.nodeType !== 1) {
+		return;
+	}
 	if(el.className === 'post-icon') {
 		icons = [el];
-	} else if(el.nodeType === 1) {
+	} else
 		icons = el.getElementsByClassName('post-icon');
-	} else {
-		return;
 	}
 	for(var i = 0; i < icons.length; ++i) {
 		var icon = icons[i];
