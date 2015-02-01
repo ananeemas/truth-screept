@@ -52,7 +52,7 @@ function sortaGovna(el) {
 	}
 	if(el.className === 'post-icon') {
 		icons = [el];
-	} else
+	} else {
 		icons = el.getElementsByClassName('post-icon');
 	}
 	for(var i = 0; i < icons.length; ++i) {
