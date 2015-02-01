@@ -47,7 +47,7 @@ var TitleMap = Object.create(null);
 
 var observer;
 
-var getHash = function() {
+var getHash = function(name) {
 	if(name in this) {
 		return this[name];
 	}
